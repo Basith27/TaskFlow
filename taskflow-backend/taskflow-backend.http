@@ -1,0 +1,6 @@
+@taskflow-backend_HostAddress = http://localhost:5229
+
+GET {{taskflow-backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

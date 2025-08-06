@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "VY+tILRjDu+AU0YdpU+WUZvzcLtnD003TNxWZ5vy/IE=",
+  "Source": "taskflow-backend",
+  "BasePath": "_content/taskflow-backend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
