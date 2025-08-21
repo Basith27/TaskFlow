@@ -43,6 +43,11 @@ namespace TaskFlow.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
+        /// Gets or sets the date and time when the card was last updated.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
         /// Gets or sets the due date for the card.
         /// </summary>
         public DateTime? DueDate { get; set; }

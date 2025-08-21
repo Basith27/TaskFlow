@@ -22,5 +22,10 @@ namespace TaskFlow.Models
         /// Gets or sets the collection of comments made by this user.
         /// </summary>
         public ICollection<Comment> Comments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collection of workspaces owned by this user.
+        /// </summary>
+        public ICollection<Workspace> Workspaces { get; set; }
     }
 }

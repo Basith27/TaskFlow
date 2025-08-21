@@ -1,23 +1,33 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using taskflow_backend.DTOs;
+using TaskFlow.DTOs;
 using TaskFlow.Models;
-using TaskFlow.Data;
-using Microsoft.EntityFrameworkCore;
+using TaskFlow.Services; // Add this for WorkspaceService
+using Microsoft.Extensions.Logging;
 
-namespace taskflow_backend.Controllers
+namespace TaskFlow.Controllers
 {
+    /// <summary>
+    /// API controller for managing workspaces.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
     public class WorkspacesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly WorkspaceService _workspaceService;
+        private readonly ILogger<WorkspacesController> _logger;
 
-        public WorkspacesController(ApplicationDbContext context)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WorkspacesController"/> class.
+        /// </summary>
+        /// <param name="workspaceService">The workspace service for business logic.</param>
+        /// <param name="logger">The logger for logging messages.</param>
+        public WorkspacesController(WorkspaceService workspaceService, ILogger<WorkspacesController> logger)
         {
-            _context = context;
+            _workspaceService = workspaceService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -33,18 +43,17 @@ namespace taskflow_backend.Controllers
                 return Unauthorized();
             }
 
-            var workspaces = await _context.Workspaces
-                .Where(w => w.UserId == userId)
-                .Select(w => new WorkspaceDto
-                {
-                    Id = w.Id,
-                    Name = w.Name,
-                    CreatedAt = w.CreatedAt,
-                    UpdatedAt = w.UpdatedAt
-                })
-                .ToListAsync();
+            var workspaces = await _workspaceService.GetWorkspacesByUserIdAsync(userId);
 
-            return Ok(workspaces);
+            var workspaceDtos = workspaces.Select(w => new WorkspaceDto
+            {
+                Id = w.Id,
+                Name = w.Name,
+                CreatedAt = w.CreatedAt,
+                UpdatedAt = w.UpdatedAt
+            }).ToList();
+
+            return Ok(workspaceDtos);
         }
 
         /// <summary>
@@ -61,23 +70,22 @@ namespace taskflow_backend.Controllers
                 return Unauthorized();
             }
 
-            var workspace = await _context.Workspaces
-                .Where(w => w.Id == id && w.UserId == userId)
-                .Select(w => new WorkspaceDto
-                {
-                    Id = w.Id,
-                    Name = w.Name,
-                    CreatedAt = w.CreatedAt,
-                    UpdatedAt = w.UpdatedAt
-                })
-                .FirstOrDefaultAsync();
+            var workspace = await _workspaceService.GetWorkspaceByIdAsync(id);
 
-            if (workspace == null)
+            if (workspace == null || workspace.UserId != userId)
             {
                 return NotFound();
             }
 
-            return Ok(workspace);
+            var workspaceDto = new WorkspaceDto
+            {
+                Id = workspace.Id,
+                Name = workspace.Name,
+                CreatedAt = workspace.CreatedAt,
+                UpdatedAt = workspace.UpdatedAt
+            };
+
+            return Ok(workspaceDto);
         }
 
         /// <summary>
@@ -102,8 +110,7 @@ namespace taskflow_backend.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _context.Workspaces.Add(workspace);
-            await _context.SaveChangesAsync();
+            await _workspaceService.CreateWorkspaceAsync(workspace);
 
             var workspaceDto = new WorkspaceDto
             {
@@ -136,11 +143,9 @@ namespace taskflow_backend.Controllers
                 return Unauthorized();
             }
 
-            var workspace = await _context.Workspaces
-                .Where(w => w.Id == id && w.UserId == userId)
-                .FirstOrDefaultAsync();
+            var workspace = await _workspaceService.GetWorkspaceByIdAsync(id);
 
-            if (workspace == null)
+            if (workspace == null || workspace.UserId != userId)
             {
                 return NotFound();
             }
@@ -148,23 +153,7 @@ namespace taskflow_backend.Controllers
             workspace.Name = request.Name;
             workspace.UpdatedAt = DateTime.UtcNow;
 
-            _context.Entry(workspace).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Workspaces.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _workspaceService.UpdateWorkspaceAsync(workspace);
 
             return NoContent();
         }
@@ -183,17 +172,14 @@ namespace taskflow_backend.Controllers
                 return Unauthorized();
             }
 
-            var workspace = await _context.Workspaces
-                .Where(w => w.Id == id && w.UserId == userId)
-                .FirstOrDefaultAsync();
+            var workspace = await _workspaceService.GetWorkspaceByIdAsync(id);
 
-            if (workspace == null)
+            if (workspace == null || workspace.UserId != userId)
             {
                 return NotFound();
             }
 
-            _context.Workspaces.Remove(workspace);
-            await _context.SaveChangesAsync();
+            await _workspaceService.DeleteWorkspaceAsync(id);
 
             return NoContent();
         }

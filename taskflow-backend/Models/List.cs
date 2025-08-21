@@ -38,6 +38,11 @@ namespace TaskFlow.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
+        /// Gets or sets the date and time when the list was last updated.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
         /// Gets or sets the collection of cards within this list.
         /// </summary>
         public ICollection<Card> Cards { get; set; }

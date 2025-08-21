@@ -225,6 +225,9 @@ namespace taskflowbackend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("WorkspaceId")
                         .HasColumnType("int");
 
@@ -274,6 +277,9 @@ namespace taskflowbackend.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ListId");
@@ -312,6 +318,9 @@ namespace taskflowbackend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -342,6 +351,9 @@ namespace taskflowbackend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BoardId");
@@ -363,7 +375,16 @@ namespace taskflowbackend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Workspaces");
                 });
@@ -509,6 +530,17 @@ namespace taskflowbackend.Migrations
                     b.Navigation("Board");
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.Workspace", b =>
+                {
+                    b.HasOne("TaskFlow.Models.ApplicationUser", "User")
+                        .WithMany("Workspaces")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.ApplicationUser", b =>
                 {
                     b.Navigation("BoardUsers");
@@ -516,6 +548,8 @@ namespace taskflowbackend.Migrations
                     b.Navigation("CardUsers");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("Workspaces");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.Board", b =>

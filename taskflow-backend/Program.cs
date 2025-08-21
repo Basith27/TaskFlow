@@ -7,13 +7,35 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
+using TaskFlow.Hubs; // Add this line
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers(); // Add controllers for REST API
+builder.Services.AddSignalR(); // Add SignalR services
+
+// Add service layer classes for dependency injection
+builder.Services.AddScoped<TaskFlow.Services.WorkspaceService>();
+builder.Services.AddScoped<TaskFlow.Services.BoardService>();
+builder.Services.AddScoped<TaskFlow.Services.ListService>();
+builder.Services.AddScoped<TaskFlow.Services.CardService>();
+builder.Services.AddScoped<TaskFlow.Services.CommentService>();
+builder.Services.AddScoped<TaskFlow.Services.UserService>();
+
+// Register repositories for dependency injection
+builder.Services.AddScoped<TaskFlow.Repositories.IWorkspaceRepository, TaskFlow.Repositories.WorkspaceRepository>();
+builder.Services.AddScoped<TaskFlow.Repositories.IBoardRepository, TaskFlow.Repositories.BoardRepository>();
+builder.Services.AddScoped<TaskFlow.Repositories.IListRepository, TaskFlow.Repositories.ListRepository>();
+builder.Services.AddScoped<TaskFlow.Repositories.ICardRepository, TaskFlow.Repositories.CardRepository>();
+builder.Services.AddScoped<TaskFlow.Repositories.ICommentRepository, TaskFlow.Repositories.CommentRepository>();
+builder.Services.AddScoped<TaskFlow.Repositories.IUserRepository, TaskFlow.Repositories.UserRepository>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Explicitly add console logging for debugging
+builder.Logging.AddConsole();
 
 // Configure DbContext with MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -61,5 +83,6 @@ app.UseAuthentication(); // Add authentication middleware
 app.UseAuthorization(); // Add authorization middleware
 
 app.MapControllers(); // Map controllers for REST API
+app.MapHub<TaskFlowHub>("/taskflowhub"); // Map SignalR Hub
 
 app.Run();

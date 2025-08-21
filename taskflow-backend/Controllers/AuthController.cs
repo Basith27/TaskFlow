@@ -11,6 +11,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace TaskFlow.Controllers
 {
+    /// <summary>
+    /// Controller for user authentication, including registration and login.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -19,6 +22,12 @@ namespace TaskFlow.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthController"/> class.
+        /// </summary>
+        /// <param name="userManager">The user manager for handling user-related operations.</param>
+        /// <param name="signInManager">The sign-in manager for handling user sign-in operations.</param>
+        /// <param name="configuration">The application configuration for JWT settings.</param>
         public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
@@ -79,13 +88,19 @@ namespace TaskFlow.Controllers
             return Unauthorized(new AuthResponse { IsSuccess = false, Errors = new[] { "Invalid credentials." } });
         }
 
+        /// <summary>
+        /// Generates a JSON Web Token (JWT) for the authenticated user.
+        /// </summary>
+        /// <param name="user">The application user for whom to generate the token.</param>
+        /// <returns>A JWT string.</returns>
         private string GenerateJwtToken(ApplicationUser user)
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
+                // Changed: Removed Sub claim and added proper claims
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
@@ -103,11 +118,20 @@ namespace TaskFlow.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Extracts error messages from ModelState.
+        /// </summary>
+        /// <returns>An array of error messages.</returns>
         private string[] GetErrorsFromModelState()
         {
             return ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray();
         }
 
+        /// <summary>
+        /// Extracts error messages from an IdentityResult.
+        /// </summary>
+        /// <param name="result">The IdentityResult object.</param>
+        /// <returns>An array of error messages.</returns>
         private string[] GetErrorsFromResult(IdentityResult result)
         {
             return result.Errors.Select(e => e.Description).ToArray();

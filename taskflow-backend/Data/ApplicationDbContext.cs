@@ -65,6 +65,13 @@ namespace TaskFlow.Data
                 .WithMany(u => u.CardUsers)
                 .HasForeignKey(cu => cu.UserId);
 
+            // Configure one-to-many relationship for ApplicationUser and Workspace
+            modelBuilder.Entity<Workspace>()
+                .HasOne(w => w.User)
+                .WithMany(u => u.Workspaces)
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete workspaces when a user is deleted
+
             // Configure one-to-many relationship for Workspace and Board
             modelBuilder.Entity<Board>()
                 .HasOne(b => b.Workspace)

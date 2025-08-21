@@ -38,6 +38,11 @@ namespace TaskFlow.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
+        /// Gets or sets the date and time when the board was last updated.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
         /// Gets or sets the collection of lists within this board.
         /// </summary>
         public ICollection<List> Lists { get; set; }

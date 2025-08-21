@@ -44,5 +44,10 @@ namespace TaskFlow.Models
         /// Gets or sets the date and time when the comment was created.
         /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Gets or sets the date and time when the comment was last updated.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }
